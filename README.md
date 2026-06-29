@@ -83,6 +83,8 @@ git clone https://github.com/denizsafak/abogen.git abogen-src
 Copy your PDF collection into:
 
 ```
+mkdir -p data/pdfs data/epubs data/audiobooks data/calibre-config data/abogen-config data/abs-config data/abs-metadata
+
 data/pdfs/
 ```
 
