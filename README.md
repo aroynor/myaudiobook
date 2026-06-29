@@ -78,21 +78,34 @@ git clone https://github.com/denizsafak/abogen.git abogen-src
 > fails, check their README for the current `Dockerfile` path and
 > update the `dockerfile:` line in `docker-compose.yml` accordingly.
 
-## 4. Add your PDFs
+## 4. Fix folder ownership
+
+The `data/` folders are tracked in git as empty placeholders, but once
+cloned they may be owned by whichever user/process did the cloning.
+Make sure they're owned by your `abhix` user so containers (running as
+`PUID`/`PGID` from `.env`) and Docker itself can read/write without
+permission errors:
+
+```bash
+sudo chown -R abhix:abhix data/
+```
+
+Confirm `abhix`'s UID/GID match what you put in `.env`:
+
+```bash
+id -u abhix   # should match PUID in .env
+id -g abhix   # should match PGID in .env
+```
+
+## 5. Add your PDFs
 
 Copy your PDF collection into:
 
 ```
-mkdir -p data/pdfs data/epubs data/audiobooks data/calibre-config data/abogen-config data/abs-config data/abs-metadata #(one time)
-
 data/pdfs/
-
-#copy desired book to convert
-abhix@homex:/usbbak3/abbox/DocZ/BOOKS/2020-2025Best$ cp Beautiful_world_where_are_you_-_Sally_Rooney.pdf /home/abhix/myaudiobook/data/pdfs/
-abhix@homex:/usbbak3/abbox/DocZ/BOOKS/2020-2025Best$ 
 ```
 
-## 5. Start Audiobookshelf (always-on service)
+## 6. Start Audiobookshelf (always-on service)
 
 ```bash
 docker compose up -d audiobookshelf
@@ -103,7 +116,7 @@ Visit `http://<server-ip>:19378` and complete the initial setup
 
 ---
 
-## 6. Convert PDFs to EPUB (Calibre, on-demand)
+## 7. Convert PDFs to EPUB (Calibre, on-demand)
 
 Start Calibre only when you need it:
 
@@ -124,7 +137,7 @@ in the background.
 
 ---
 
-## 7. Benchmark before converting a full book (recommended)
+## 8. Benchmark before converting a full book (recommended)
 
 Processing speed varies a lot by hardware. Before queuing an entire
 500-page book, test with a single chapter first:
@@ -144,7 +157,7 @@ expect.
 
 ---
 
-## 8. Convert EPUB to Audiobook (abogen, on-demand)
+## 9. Convert EPUB to Audiobook (abogen, on-demand)
 
 Start abogen only when you have EPUBs ready to process:
 
@@ -184,7 +197,7 @@ next time.)
 
 ---
 
-## 9. Listen on iPhone
+## 10. Listen on iPhone
 
 1. Install the official **Audiobookshelf** app from the App Store
 2. Connect it to `http://<server-ip>:19378` (or your reverse-proxied
@@ -242,7 +255,7 @@ headroom you want left for other containers.
 
 ## Troubleshooting
 
-- **abogen build fails**: check that `abogen-src/abogen/Dockerfile`
+- **abogen build fails**: check that `abogen-src/Dockerfile`
   exists after cloning; abogen's repo structure may change over time.
 - **Permission errors on mounted folders**: double check `PUID`/`PGID`
   in `.env` match your host user (`id -u`, `id -g`).

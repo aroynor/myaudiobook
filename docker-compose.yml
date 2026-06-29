@@ -34,7 +34,6 @@ services:
   abogen:
     build:
       context: ./abogen-src        # cloned repo, see README setup step
-      dockerfile: abogen/Dockerfile
     container_name: abogen
     profiles: ["convert"]
     environment:
