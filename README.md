@@ -83,9 +83,13 @@ git clone https://github.com/denizsafak/abogen.git abogen-src
 Copy your PDF collection into:
 
 ```
-mkdir -p data/pdfs data/epubs data/audiobooks data/calibre-config data/abogen-config data/abs-config data/abs-metadata
+mkdir -p data/pdfs data/epubs data/audiobooks data/calibre-config data/abogen-config data/abs-config data/abs-metadata #(one time)
 
 data/pdfs/
+
+#copy desired book to convert
+abhix@homex:/usbbak3/abbox/DocZ/BOOKS/2020-2025Best$ cp Beautiful_world_where_are_you_-_Sally_Rooney.pdf /home/abhix/myaudiobook/data/pdfs/
+abhix@homex:/usbbak3/abbox/DocZ/BOOKS/2020-2025Best$ 
 ```
 
 ## 5. Start Audiobookshelf (always-on service)
