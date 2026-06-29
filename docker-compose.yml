@@ -33,7 +33,10 @@ services:
   # ---------------------------------------------------------------------
   abogen:
     build:
-      context: ./abogen-src        # cloned repo, see README setup step
+      context: ./abogen-src
+      dockerfile: abogen/webui/Dockerfile
+      args:
+        TORCH_INDEX_URL: https://download.pytorch.org/whl/cpu   # CPU-only wheel; avoids the huge default CUDA download
     container_name: abogen
     profiles: ["convert"]
     environment:
@@ -43,12 +46,20 @@ services:
       - ABOGEN_OUTPUT_ROOT=/data/outputs
       - ABOGEN_OUTPUT_DIR=/data/outputs
       - ABOGEN_SETTINGS_DIR=/config
+      - ABOGEN_TEMP_DIR=/data/cache
+      - ABOGEN_VOICE_CACHE_DIR=/data/voice-cache
+      - HF_HOME=/data/huggingface
+      - HUGGINGFACE_HUB_CACHE=/data/huggingface/hub
       - ABOGEN_UID=${PUID:-1000}
       - ABOGEN_GID=${PGID:-1000}
+    user: "${PUID:-1000}:${PGID:-1000}"
     volumes:
       - ./data/epubs:/data/uploads
       - ./data/audiobooks:/data/outputs
       - ./data/abogen-config:/config
+      - ./data/abogen-cache:/data/cache
+      - ./data/abogen-voice-cache:/data/voice-cache
+      - ./data/abogen-huggingface:/data/huggingface
     ports:
       - "18808:8808"
     deploy:

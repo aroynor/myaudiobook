@@ -281,6 +281,9 @@ audiobook-pipeline/
     ├── audiobooks/            # abogen output / Audiobookshelf library
     ├── calibre-config/
     ├── abogen-config/
+    ├── abogen-cache/
+    ├── abogen-voice-cache/
+    ├── abogen-huggingface/
     ├── abs-config/
     └── abs-metadata/
 ```
