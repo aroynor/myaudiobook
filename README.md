@@ -16,7 +16,7 @@ PDFs (your library)
 [abogen]   -- EPUB -> M4B audiobook via Kokoro TTS (on-demand, CPU/GPU)
    │
    ▼
-[Audiobookshelf] -- always-on library server
+[Audiobookshelf] -- library server (manual start, see below)
    │
    ▼
 iPhone (Audiobookshelf app) -- manual download per book, offline listening
@@ -26,7 +26,10 @@ iPhone (Audiobookshelf app) -- manual download per book, offline listening
 - Calibre and abogen are **manually started** (`profiles: ["convert"]`),
   so they never run in the background or compete with your other
   containers for CPU/RAM unless you explicitly start them.
-- Audiobookshelf is **always-on** but very lightweight at idle.
+- All three services are manual-start only — nothing in this repo
+  auto-starts on boot or container crash. You restart each one
+  explicitly when you want it running, including Audiobookshelf after
+  a server reboot.
 - All resource limits are set conservatively for an older 4-core /
   16GB homeserver. Adjust in `docker-compose.yml` if your hardware
   differs.
@@ -105,11 +108,17 @@ Copy your PDF collection into:
 data/pdfs/
 ```
 
-## 6. Start Audiobookshelf (always-on service)
+## 6. Start Audiobookshelf
 
 ```bash
 docker compose up -d audiobookshelf
 ```
+
+> **Note:** since nothing in this repo auto-starts, you'll need to run
+> this command again any time your homeserver reboots, before the
+> iPhone app can connect. If you'd rather it come back automatically
+> after a reboot/crash, change its `restart:` policy back to
+> `unless-stopped` in `docker-compose.yml`.
 
 Visit `http://<server-ip>:19378` and complete the initial setup
 (create admin user, add a library pointing at `/audiobooks`).
@@ -232,7 +241,7 @@ Chosen specifically to avoid clashing with common defaults (8080,
 
 | Service | Host port | Purpose |
 |---|---|---|
-| audiobookshelf | 19378 | Web UI + API (always-on) |
+| audiobookshelf | 19378 | Web UI + API |
 | abogen | 18808 | Web UI (only when started) |
 | calibre | 18083 | Optional GUI (only when started) |
 
@@ -247,7 +256,7 @@ colon) should stay as-is.
 |---|---|---|---|
 | calibre | manual / on-demand | 1.0 | 1 GB |
 | abogen | manual / on-demand | 3.0 | 6 GB |
-| audiobookshelf | always-on | 0.5 | 512 MB |
+| audiobookshelf | manual / on-demand | 0.5 | 512 MB |
 
 Adjust these in `docker-compose.yml` under each service's
 `deploy.resources.limits` to match your actual hardware and how much

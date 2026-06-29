@@ -70,7 +70,8 @@ services:
     restart: "no"
 
   # ---------------------------------------------------------------------
-  # AUDIOBOOKSHELF - always-on library server
+  # AUDIOBOOKSHELF - library server (manual start, does not auto-start
+  # on boot/crash; restart manually after a server reboot)
   # ---------------------------------------------------------------------
   audiobookshelf:
     image: ghcr.io/advplyr/audiobookshelf:latest
@@ -88,4 +89,4 @@ services:
         limits:
           cpus: "0.5"
           memory: 512m
-    restart: unless-stopped
+    restart: "no"
