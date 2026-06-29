@@ -1,0 +1,81 @@
+name: audiobook-pipeline
+
+services:
+  # ---------------------------------------------------------------------
+  # CALIBRE - PDF -> EPUB cleanup
+  # Manual start only (profile: convert). Provides ebook-convert CLI.
+  # ---------------------------------------------------------------------
+  calibre:
+    image: linuxserver/calibre:latest
+    container_name: calibre
+    profiles: ["convert"]
+    environment:
+      - PUID=${PUID:-1000}
+      - PGID=${PGID:-1000}
+      - TZ=${TZ:-Etc/UTC}
+    volumes:
+      - ./data/calibre-config:/config
+      - ./data/pdfs:/books/pdf
+      - ./data/epubs:/books/epub
+      - ./scripts:/scripts
+    ports:
+      - "18083:8080"  # web GUI, only needed if you want the visual app
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 1g
+    restart: "no"
+
+  # ---------------------------------------------------------------------
+  # ABOGEN - EPUB -> M4B audiobook via Kokoro TTS
+  # Manual start only (profile: convert). Built from source, see README.
+  # ---------------------------------------------------------------------
+  abogen:
+    build:
+      context: ./abogen-src        # cloned repo, see README setup step
+      dockerfile: abogen/Dockerfile
+    container_name: abogen
+    profiles: ["convert"]
+    environment:
+      - ABOGEN_HOST=0.0.0.0
+      - ABOGEN_PORT=8808
+      - ABOGEN_UPLOAD_ROOT=/data/uploads
+      - ABOGEN_OUTPUT_ROOT=/data/outputs
+      - ABOGEN_OUTPUT_DIR=/data/outputs
+      - ABOGEN_SETTINGS_DIR=/config
+      - ABOGEN_UID=${PUID:-1000}
+      - ABOGEN_GID=${PGID:-1000}
+    volumes:
+      - ./data/epubs:/data/uploads
+      - ./data/audiobooks:/data/outputs
+      - ./data/abogen-config:/config
+    ports:
+      - "18808:8808"
+    deploy:
+      resources:
+        limits:
+          cpus: "3.0"     # leave 1 core free for other containers
+          memory: 6g
+    restart: "no"
+
+  # ---------------------------------------------------------------------
+  # AUDIOBOOKSHELF - always-on library server
+  # ---------------------------------------------------------------------
+  audiobookshelf:
+    image: ghcr.io/advplyr/audiobookshelf:latest
+    container_name: audiobookshelf
+    environment:
+      - TZ=${TZ:-Etc/UTC}
+    volumes:
+      - ./data/audiobooks:/audiobooks
+      - ./data/abs-config:/config
+      - ./data/abs-metadata:/metadata
+    ports:
+      - "19378:80"
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512m
+    restart: unless-stopped
